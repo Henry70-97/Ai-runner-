@@ -196,13 +196,13 @@
       left: 0;
     }
     
-    input, textarea {
+    input, textarea, select {
       background: rgba(20, 25, 55, 0.8) !important;
       border: 1px solid rgba(0, 255, 136, 0.3);
       color: white;
     }
     
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: rgba(0, 255, 136, 0.8);
       box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
@@ -744,13 +744,13 @@
        </div>
        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
        </svg></button>
-     </div><!-- Recent Activity -->
+     </div><!-- Recent Transactions -->
      <div class="space-y-3">
-      <h2 class="font-orbitron text-lg font-semibold">Recent Activity</h2>
+      <h2 class="font-orbitron text-lg font-semibold">Recent Transactions</h2>
       <div id="recentActivity" class="space-y-2">
        <div class="glass rounded-xl p-4 text-center text-gray-400">
-        <p>No recent activity</p>
-        <p class="text-sm mt-1">Complete tasks to see your history</p>
+        <p>No recent transactions</p>
+        <p class="text-sm mt-1">Complete tasks or withdraw to see activity</p>
        </div>
       </div>
      </div>
@@ -907,6 +907,9 @@
         $0.60
        </div>
       </div>
+      <div id="taskFeedback" class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 mb-6 text-left hidden">
+       <p id="feedbackText" class="text-sm text-amber-100"></p>
+      </div>
       <div class="space-y-3"><button onclick="showPage('tasksPage')" class="w-full btn-neon py-4 rounded-xl font-orbitron font-semibold text-navy"> Do Another Task </button> <button onclick="showPage('dashboardPage')" class="w-full py-4 rounded-xl border border-gray-600 text-gray-300 hover:border-neon/50 hover:text-neon transition-colors"> Back to Dashboard </button>
       </div>
      </div>
@@ -936,7 +939,7 @@
        <div class="space-y-4">
         <div><label for="withdrawAmount" class="block text-sm font-medium text-gray-300 mb-2">Amount to Withdraw</label> <input type="number" id="withdrawAmount" step="0.01" min="0" required class="w-full px-4 py-3 rounded-xl" placeholder="0.00">
         </div>
-        <div><label for="withdrawMethod" class="block text-sm font-medium text-gray-300 mb-2">Payment Method</label> <select id="withdrawMethod" required class="w-full px-4 py-3 rounded-xl bg-navy-light border border-neon/30"> <option value="">Select method</option> <option value="mpesa">M-Pesa</option> <option value="paypal">PayPal</option> <option value="bank">Bank Transfer</option> </select>
+        <div><label for="withdrawMethod" class="block text-sm font-medium text-gray-300 mb-2">Payment Method</label> <select id="withdrawMethod" required class="w-full px-4 py-3 rounded-xl"> <option value="">Select method</option> <option value="mpesa">M-Pesa</option> <option value="paypal">PayPal</option> <option value="bank">Bank Transfer</option> </select>
         </div>
         <div><label for="withdrawDetails" class="block text-sm font-medium text-gray-300 mb-2">Payment Details</label> <input type="text" id="withdrawDetails" required class="w-full px-4 py-3 rounded-xl" placeholder="Phone number or email">
         </div><button type="submit" id="withdrawBtn" class="w-full btn-electric py-4 rounded-xl font-orbitron font-semibold text-navy"> Request Withdrawal </button>
@@ -988,7 +991,7 @@
         <li class="flex items-center gap-3">
          <svg class="w-5 h-5 text-neon flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
          </svg><span class="text-gray-300">Priority task access</span></li>
-       </ul><a href="https://paystack.shop/pay/a2k4aowc8t" target="_blank" rel="noopener noreferrer" class="block w-full btn-neon py-4 rounded-xl font-orbitron font-semibold text-navy text-center"> Subscribe Now - $3 </a>
+       </ul><a href="https://payment.intasend.com/pay/159b9e33-b56f-49d4-b57e-de6a7cb38560/" target="_blank" rel="noopener noreferrer" class="block w-full btn-neon py-4 rounded-xl font-orbitron font-semibold text-navy text-center"> Subscribe Now - $3 </a>
       </div>
      </div><!-- Already Paid Section -->
      <div class="glass rounded-2xl p-6">
@@ -1085,7 +1088,33 @@
     let taskTimer = null;
     let taskTimeRemaining = 300;
 
-    // Task database
+    // Swahili translation dictionary for strict validation
+    const swahiliDictionary = {
+      'welcome': 'karibu', 'store': 'duka', 'how': 'vipi', 'can': 'inaweza',
+      'help': 'msaada', 'today': 'leo', 'thank': 'asante', 'please': 'tafadhali',
+      'order': 'amri', 'received': 'pokelewa', 'purchase': 'ununuzi', 'confirm': 'thibitisha',
+      'button': 'kitufe', 'below': 'chini', 'payment': 'malipo', 'thank you': 'asante sana',
+      'apologies': 'maombezi', 'inconvenience': 'tabu', 'team': 'timu', 'working': 'inafanya',
+      'wait': 'subiri', 'minutes': 'dakika', 'request': 'ombi', 'free': 'bure',
+      'delivery': 'utoaji', 'all': 'yote', 'orders': 'amri', 'over': 'zaidi',
+      'subscribe': 'jiandikishe', 'newsletter': 'habari', 'exclusive': 'pekee',
+      'deals': 'mitumba', 'contact': 'wasiliana', 'support': 'usaidizi', 'assistance': 'msaada',
+      'go': 'kwenda', 'meet': 'kukutana', 'friends': 'rafiki', 'mall': 'sokoni',
+      'evening': 'jioni', 'good': 'nzuri', 'morning': 'asubuhi', 'hello': 'habari',
+      'yes': 'ndiyo', 'no': 'hapana', 'money': 'pesa', 'account': 'akaunti',
+      'successfully': 'matagano', 'created': 'kutengeneza', 'follow': 'fuata',
+      'steps': 'hatua', 'simple': 'rahisi', 'finish': 'maliza', 'registration': 'usajili'
+    };
+
+    // Sheng dictionary for validation
+    const shengDictionary = {
+      'phone': 'simu', 'battery': 'betri', 'died': 'kufa', 'charge': 'kuweka',
+      'football': 'mpira', 'match': 'mchezo', 'watch': 'kutazama', 'place': 'mahali',
+      'let': 'hebu', 'going': 'kuenda', 'amazing': 'nzuri', 'party': 'sherehe',
+      'last': 'ya mwisho', 'night': 'usiku', 'everyone': 'kila mtu', 'fun': 'joyful'
+    };
+
+    // Task database with strict validation for translations
     const taskDatabase = {
       chat: [
         { instructions: "Write a friendly greeting message for a customer service chatbot that sells electronics.", wordLimit: "50-100" },
@@ -1097,105 +1126,31 @@
         { instructions: "Write a product recommendation response for someone looking for a laptop under $500.", wordLimit: "80-120" },
         { instructions: "Compose a friendly AI response explaining how to use a mobile banking app.", wordLimit: "70-100" },
         { instructions: "Write a chatbot response helping someone choose between two phone plans.", wordLimit: "80-120" },
-        { instructions: "Create an engaging welcome message for a language learning chatbot.", wordLimit: "60-90" },
-        { instructions: "Write a helpful response to: 'What's the weather like today?'", wordLimit: "40-70" },
-        { instructions: "Compose an AI response for a restaurant reservation assistant.", wordLimit: "60-90" },
-        { instructions: "Write a chatbot message explaining return policy for an online store.", wordLimit: "80-120" },
-        { instructions: "Create a conversation response for an AI career counselor.", wordLimit: "80-120" },
-        { instructions: "Write a friendly closing message for ending a customer support chat.", wordLimit: "40-70" },
-        { instructions: "Compose an AI response helping someone troubleshoot WiFi issues.", wordLimit: "80-120" },
-        { instructions: "Write a chatbot message for a food delivery app confirming an order.", wordLimit: "50-80" },
-        { instructions: "Create an empathetic response to a customer who received a damaged item.", wordLimit: "80-120" },
-        { instructions: "Write a helpful AI response about subscription cancellation options.", wordLimit: "70-100" },
-        { instructions: "Compose a chatbot greeting for an educational platform for kids.", wordLimit: "50-80" }
+        { instructions: "Create an engaging welcome message for a language learning chatbot.", wordLimit: "60-90" }
       ],
       rewrite: [
         { instructions: "Rewrite this sentence to be more professional: 'Hey, ur order is gonna be late lol sorry bout that.'", wordLimit: "20-40" },
         { instructions: "Improve this product description: 'This phone is good. It has nice camera. Battery lasts long.'", wordLimit: "80-120" },
         { instructions: "Rewrite to be more engaging: 'Our company was founded in 2010. We sell software.'", wordLimit: "60-100" },
         { instructions: "Make this email more polite: 'Send the report now. I need it urgently.'", wordLimit: "40-70" },
-        { instructions: "Rewrite for clarity: 'The thing with the stuff needs to be done before the deadline which is soon.'", wordLimit: "30-50" },
-        { instructions: "Improve this headline: 'Sale on Products'", wordLimit: "10-20" },
-        { instructions: "Rewrite to be more persuasive: 'You should buy our product. It's okay.'", wordLimit: "40-70" },
-        { instructions: "Make this more concise: 'In my personal opinion, I think that we should consider the possibility of maybe starting the project soon.'", wordLimit: "20-40" },
-        { instructions: "Rewrite for a younger audience: 'Our financial services provide comprehensive portfolio management solutions.'", wordLimit: "40-70" },
-        { instructions: "Improve this thank you note: 'Thanks for buying stuff from us.'", wordLimit: "40-70" },
-        { instructions: "Rewrite to be more formal: 'Yo, can u check this out and lemme know what u think?'", wordLimit: "30-50" },
-        { instructions: "Make this more exciting: 'We are having a sale. Prices are reduced.'", wordLimit: "30-50" },
-        { instructions: "Rewrite for better SEO: 'Our store sells shoes online.'", wordLimit: "40-70" },
-        { instructions: "Improve this error message: 'Error. Something went wrong.'", wordLimit: "30-50" },
-        { instructions: "Rewrite to be more empathetic: 'Your complaint has been received.'", wordLimit: "40-70" },
-        { instructions: "Make this bio more interesting: 'John works at a company. He likes his job.'", wordLimit: "50-80" },
-        { instructions: "Rewrite for social media: 'Our restaurant serves food from 9am to 9pm every day.'", wordLimit: "30-50" },
-        { instructions: "Improve this call-to-action: 'Click here'", wordLimit: "10-25" },
-        { instructions: "Rewrite to sound more confident: 'I think maybe I could possibly help with this project.'", wordLimit: "20-40" },
-        { instructions: "Make this more descriptive: 'The sunset was nice.'", wordLimit: "40-70" }
+        { instructions: "Rewrite for clarity: 'The thing with the stuff needs to be done before the deadline which is soon.'", wordLimit: "30-50" }
       ],
       translation: [
-        { instructions: "Translate to Swahili: 'Welcome to our store. How can I help you today?'", wordLimit: "15-30" },
-        { instructions: "Translate to English: 'Asante sana kwa msaada wako. Tunakaribisha maoni yako.'", wordLimit: "15-30" },
-        { instructions: "Translate to Sheng: 'I'm going to meet my friends at the mall this evening.'", wordLimit: "15-30" },
-        { instructions: "Translate to Swahili: 'Please confirm your order by clicking the button below.'", wordLimit: "15-30" },
-        { instructions: "Translate to English: 'Karibu tena! Tunatumai umefurahi na huduma yetu.'", wordLimit: "15-30" },
-        { instructions: "Translate to Swahili: 'Your payment has been received. Thank you for your purchase.'", wordLimit: "15-30" },
-        { instructions: "Translate to English: 'Tafadhali subiri dakika chache wakati tunashughulikia ombi lako.'", wordLimit: "15-30" },
-        { instructions: "Translate to Sheng: 'The party last night was amazing and everyone had fun.'", wordLimit: "15-30" },
-        { instructions: "Translate to Swahili: 'We apologize for the inconvenience. Our team is working on it.'", wordLimit: "20-35" },
-        { instructions: "Translate to English: 'Habari za asubuhi! Je, unahitaji msaada wowote leo?'", wordLimit: "15-25" },
-        { instructions: "Translate to Swahili: 'Free delivery on all orders over $50.'", wordLimit: "10-20" },
-        { instructions: "Translate to English: 'Pesa yako imepokelewa. Tutawasiliana nawe hivi karibuni.'", wordLimit: "15-25" },
-        { instructions: "Translate to Sheng: 'My phone battery died and I need to charge it.'", wordLimit: "10-20" },
-        { instructions: "Translate to Swahili: 'Subscribe to our newsletter for exclusive deals.'", wordLimit: "10-20" },
-        { instructions: "Translate to English: 'Tuma ujumbe kwa nambari hii kwa maswali zaidi.'", wordLimit: "10-20" },
-        { instructions: "Translate to Swahili: 'Your account has been successfully created.'", wordLimit: "10-20" },
-        { instructions: "Translate to English: 'Fuata hatua hizi rahisi kumaliza usajili wako.'", wordLimit: "10-20" },
-        { instructions: "Translate to Sheng: 'Let's go watch the football match at his place.'", wordLimit: "10-20" },
-        { instructions: "Translate to Swahili: 'Contact our support team if you need assistance.'", wordLimit: "10-20" },
-        { instructions: "Translate to English: 'Hongera! Umeshinda zawadi maalum.'", wordLimit: "8-15" }
+        { instructions: "Translate to Swahili: 'Welcome to our store. How can I help you today?'", wordLimit: "5-15", correctAnswer: "karibu duka lako vipi msaada leo", source: "en", target: "sw" },
+        { instructions: "Translate to English: 'Asante sana kwa msaada wako.'", wordLimit: "5-10", correctAnswer: "thank you very much for your help", source: "sw", target: "en" },
+        { instructions: "Translate to Swahili: 'Your payment has been received.'", wordLimit: "5-10", correctAnswer: "malipo yako yamepokelewa", source: "en", target: "sw" },
+        { instructions: "Translate to English: 'Karibu tena!'", wordLimit: "3-5", correctAnswer: "welcome again", source: "sw", target: "en" },
+        { instructions: "Translate to Swahili: 'Please wait a few minutes.'", wordLimit: "5-10", correctAnswer: "tafadhali subiri dakika chache", source: "en", target: "sw" }
       ],
       prompt: [
         { instructions: "Write a prompt that would make an AI generate a creative story about space exploration.", wordLimit: "30-60" },
         { instructions: "Create a prompt for generating professional email templates.", wordLimit: "30-60" },
-        { instructions: "Write a prompt to get an AI to explain quantum physics to a 10-year-old.", wordLimit: "30-60" },
-        { instructions: "Create a prompt for generating healthy meal recipes.", wordLimit: "30-60" },
-        { instructions: "Write a prompt that would help AI create a business plan outline.", wordLimit: "40-70" },
-        { instructions: "Create a prompt for generating motivational quotes.", wordLimit: "25-50" },
-        { instructions: "Write a prompt to get AI to role-play as a job interviewer.", wordLimit: "40-70" },
-        { instructions: "Create a prompt for generating social media content ideas.", wordLimit: "30-60" },
-        { instructions: "Write a prompt that would make AI create a workout routine.", wordLimit: "40-70" },
-        { instructions: "Create a prompt for generating children's bedtime stories.", wordLimit: "30-60" },
-        { instructions: "Write a prompt to get AI to summarize long articles effectively.", wordLimit: "30-60" },
-        { instructions: "Create a prompt for generating poetry about nature.", wordLimit: "25-50" },
-        { instructions: "Write a prompt that would help AI create product descriptions.", wordLimit: "30-60" },
-        { instructions: "Create a prompt for generating conversation starters.", wordLimit: "25-50" },
-        { instructions: "Write a prompt to get AI to explain coding concepts simply.", wordLimit: "40-70" },
-        { instructions: "Create a prompt for generating birthday messages.", wordLimit: "25-50" },
-        { instructions: "Write a prompt that would make AI create travel itineraries.", wordLimit: "40-70" },
-        { instructions: "Create a prompt for generating debate arguments.", wordLimit: "30-60" },
-        { instructions: "Write a prompt to get AI to help with brainstorming sessions.", wordLimit: "30-60" },
-        { instructions: "Create a prompt for generating customer survey questions.", wordLimit: "30-60" }
+        { instructions: "Write a prompt to get an AI to explain quantum physics to a 10-year-old.", wordLimit: "30-60" }
       ],
       creativity: [
         { instructions: "Write a catchy slogan for an eco-friendly water bottle brand.", wordLimit: "5-15" },
         { instructions: "Create a short poem (4 lines) about Monday mornings.", wordLimit: "20-40" },
-        { instructions: "Write a creative product name for a smart alarm clock.", wordLimit: "3-10" },
-        { instructions: "Compose a haiku about technology.", wordLimit: "10-20" },
-        { instructions: "Write a funny caption for a cat sitting on a laptop.", wordLimit: "10-25" },
-        { instructions: "Create a one-sentence horror story.", wordLimit: "10-25" },
-        { instructions: "Write a creative excuse for being late to work.", wordLimit: "15-30" },
-        { instructions: "Compose a limerick about coffee.", wordLimit: "20-40" },
-        { instructions: "Write a motivational quote for students.", wordLimit: "10-25" },
-        { instructions: "Create a tongue twister about technology.", wordLimit: "10-25" },
-        { instructions: "Write a creative restaurant name for a fusion cuisine place.", wordLimit: "3-10" },
-        { instructions: "Compose a short jingle for a pizza delivery service.", wordLimit: "15-35" },
-        { instructions: "Write a creative way to say 'thank you'.", wordLimit: "10-25" },
-        { instructions: "Create a riddle about the internet.", wordLimit: "20-40" },
-        { instructions: "Write a creative bio for a fictional superhero.", wordLimit: "30-60" },
-        { instructions: "Compose an acrostic poem using the word 'DREAM'.", wordLimit: "20-40" },
-        { instructions: "Write a creative metaphor for life.", wordLimit: "10-25" },
-        { instructions: "Create a funny review for an imaginary product.", wordLimit: "30-60" },
-        { instructions: "Write a creative way to describe rain.", wordLimit: "15-35" },
-        { instructions: "Compose a short dialogue between two emojis.", wordLimit: "25-50" }
+        { instructions: "Write a creative product name for a smart alarm clock.", wordLimit: "3-10" }
       ]
     };
 
@@ -1217,11 +1172,9 @@
         window.scrollTo(0, 0);
       }
       
-      // Update mobile menu based on page
       updateMobileMenu();
       closeMobileMenu();
       
-      // Page-specific updates
       if (pageId === 'dashboardPage') updateDashboard();
       if (pageId === 'withdrawPage') updateWithdrawPage();
       if (pageId === 'subscriptionPage') updateSubscriptionPage();
@@ -1338,7 +1291,6 @@
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
       
-      // Check if user exists in localStorage
       const users = JSON.parse(localStorage.getItem('airunner_users') || '[]');
       const user = users.find(u => u.email === email && u.password === password);
       
@@ -1359,7 +1311,6 @@
       const password = document.getElementById('registerPassword').value;
       const phone = document.getElementById('registerPhone').value;
       
-      // Check if email already exists
       const users = JSON.parse(localStorage.getItem('airunner_users') || '[]');
       if (users.find(u => u.email === email)) {
         showToast('Email already registered. Please login.', 'error');
@@ -1377,6 +1328,7 @@
         withdrawalsThisMonth: 0,
         registeredAt: new Date().toISOString(),
         taskHistory: [],
+        transactions: [],
         dailyTasks: {
           chat: 0, rewrite: 0, translation: 0, prompt: 0, creativity: 0,
           lastReset: new Date().toDateString()
@@ -1386,7 +1338,6 @@
       users.push(newUser);
       localStorage.setItem('airunner_users', JSON.stringify(users));
       
-      // Send registration data via Web3Forms
       sendToEmail({
         type: 'Registration',
         username,
@@ -1429,6 +1380,7 @@
           users[userIndex].balance = 0;
           users[userIndex].tasksCompleted = 0;
           users[userIndex].taskHistory = [];
+          users[userIndex].transactions = [];
           users[userIndex].dailyTasks = {
             chat: 0, rewrite: 0, translation: 0, prompt: 0, creativity: 0,
             lastReset: new Date().toDateString()
@@ -1457,7 +1409,6 @@
       membershipBadge.textContent = currentUser.isPro ? 'Pro Runner ⭐' : 'Free Runner';
       membershipBadge.className = currentUser.isPro ? 'text-neon' : 'text-gray-400';
       
-      // Update next withdraw date
       const today = new Date();
       let nextWithdraw = '';
       if (currentUser.isPro) {
@@ -1473,7 +1424,6 @@
       }
       document.getElementById('dashNextWithdraw').textContent = nextWithdraw;
       
-      // Show/hide upgrade banner
       const upgradeBanner = document.getElementById('proUpgradeBanner');
       if (currentUser.isPro) {
         upgradeBanner.classList.add('hidden');
@@ -1481,34 +1431,33 @@
         upgradeBanner.classList.remove('hidden');
       }
       
-      // Update recent activity
       updateRecentActivity();
     }
 
     function updateRecentActivity() {
       const container = document.getElementById('recentActivity');
-      const history = currentUser.taskHistory || [];
+      const transactions = currentUser.transactions || [];
       
-      if (history.length === 0) {
+      if (transactions.length === 0) {
         container.innerHTML = `
           <div class="glass rounded-xl p-4 text-center text-gray-400">
-            <p>No recent activity</p>
-            <p class="text-sm mt-1">Complete tasks to see your history</p>
+            <p>No recent transactions</p>
+            <p class="text-sm mt-1">Complete tasks or withdraw to see activity</p>
           </div>
         `;
         return;
       }
       
-      const recent = history.slice(-5).reverse();
+      const recent = transactions.slice(-10).reverse();
       container.innerHTML = recent.map(item => `
         <div class="glass rounded-xl p-4 flex items-center justify-between">
           <div>
-            <div class="font-medium">${item.category}</div>
+            <div class="font-medium capitalize">${item.type}</div>
             <div class="text-gray-400 text-sm">${new Date(item.date).toLocaleDateString()}</div>
           </div>
           <div class="text-right">
-            <div class="text-neon font-orbitron">+$${item.reward.toFixed(2)}</div>
-            <div class="text-gray-400 text-sm">Score: ${item.score}</div>
+            <div class="text-neon font-orbitron">${item.type === 'task' ? '+' : '-'}$${item.amount.toFixed(2)}</div>
+            <div class="text-gray-400 text-sm capitalize">${item.status || 'completed'}</div>
           </div>
         </div>
       `).join('');
@@ -1518,7 +1467,6 @@
     function updateTasksPage() {
       if (!currentUser) return;
       
-      // Reset daily tasks if new day
       const today = new Date().toDateString();
       if (currentUser.dailyTasks && currentUser.dailyTasks.lastReset !== today) {
         currentUser.dailyTasks = {
@@ -1529,8 +1477,6 @@
       }
       
       const isPro = currentUser.isPro;
-      const dailyLimit = isPro ? '∞' : 2;
-      
       const categories = ['chat', 'rewrite', 'translation', 'prompt', 'creativity'];
       categories.forEach(cat => {
         const el = document.getElementById(cat + 'TasksRemaining');
@@ -1548,7 +1494,6 @@
         return;
       }
       
-      // Check daily limit for free users
       if (!currentUser.isPro) {
         const used = currentUser.dailyTasks ? currentUser.dailyTasks[category] || 0 : 0;
         if (used >= 2) {
@@ -1557,7 +1502,6 @@
         }
       }
       
-      // Get random task from category
       const tasks = taskDatabase[category];
       const randomTask = tasks[Math.floor(Math.random() * tasks.length)];
       
@@ -1567,21 +1511,12 @@
         startTime: Date.now()
       };
       
-      // Update task page UI
       const categoryNames = {
         chat: 'AI Chat Missions',
         rewrite: 'Rewrite & Improve',
         translation: 'Translation',
         prompt: 'Prompt Challenges',
         creativity: 'Micro Creativity'
-      };
-      
-      const categoryColors = {
-        chat: 'neon',
-        rewrite: 'electric',
-        translation: 'purple',
-        prompt: 'pink-500',
-        creativity: 'amber-500'
       };
       
       const rewardRanges = {
@@ -1600,7 +1535,6 @@
       document.getElementById('wordCount').textContent = '0';
       document.getElementById('wordStatus').textContent = '';
       
-      // Start timer
       taskTimeRemaining = 300;
       updateTimerDisplay();
       if (taskTimer) clearInterval(taskTimer);
@@ -1632,6 +1566,36 @@
       showPage('tasksPage');
     }
 
+    function validateTranslation(response, task) {
+      if (!task.source || !task.target) return 100; // Not a translation task
+      
+      const responseLower = response.toLowerCase().trim();
+      const correctLower = task.correctAnswer.toLowerCase().trim();
+      
+      // Exact match
+      if (responseLower === correctLower) return 100;
+      
+      // Check key words from correct answer
+      const correctWords = correctLower.split(/\s+/);
+      const responseWords = responseLower.split(/\s+/);
+      
+      let keywordMatches = 0;
+      correctWords.forEach(word => {
+        if (responseWords.some(rw => rw.includes(word) || word.includes(rw))) {
+          keywordMatches++;
+        }
+      });
+      
+      const matchPercentage = (keywordMatches / correctWords.length) * 100;
+      
+      // Strict validation - need at least 70% match
+      if (matchPercentage < 70) {
+        return 0; // Reject
+      }
+      
+      return matchPercentage;
+    }
+
     function submitTask(timedOut = false) {
       if (taskTimer) clearInterval(taskTimer);
       
@@ -1642,21 +1606,43 @@
         return;
       }
       
-      // Calculate score
-      let score = calculateScore(response, currentTask);
+      let score = 0;
+      let feedback = '';
       
-      if (timedOut && !response) {
-        score = 0;
+      // Validate translation strictly
+      if (currentTask.category === 'translation') {
+        score = validateTranslation(response, currentTask);
+        if (score === 0) {
+          feedback = '❌ Translation is not accurate. Please ensure you use correct words.';
+          score = 0;
+        } else if (score < 100) {
+          feedback = '⚠️ Translation is mostly correct but has minor errors.';
+        } else {
+          feedback = '✅ Perfect translation!';
+        }
+      } else {
+        score = calculateScore(response, currentTask);
+        
+        if (timedOut && !response) {
+          score = 0;
+          feedback = 'Time expired with no submission.';
+        } else if (score >= 90) {
+          feedback = '✅ Excellent work!';
+        } else if (score >= 75) {
+          feedback = '✓ Good job!';
+        } else if (score >= 50) {
+          feedback = '⚠️ Work on quality for better scores.';
+        } else {
+          feedback = 'Below expectations. Try again!';
+        }
       }
       
-      // Calculate reward based on score
       let reward = 0;
       if (score >= 90) reward = 1.00;
       else if (score >= 75) reward = 0.60;
       else if (score >= 50) reward = 0.20;
       else reward = 0.05;
       
-      // Adjust reward based on category
       const categoryMultipliers = {
         chat: 0.8,
         rewrite: 1.0,
@@ -1668,7 +1654,7 @@
       reward = reward * (categoryMultipliers[currentTask.category] || 1);
       reward = Math.round(reward * 100) / 100;
       
-      // Update user data
+      // Update user
       currentUser.balance = (currentUser.balance || 0) + reward;
       currentUser.tasksCompleted = (currentUser.tasksCompleted || 0) + 1;
       
@@ -1685,13 +1671,31 @@
         date: new Date().toISOString()
       });
       
+      if (!currentUser.transactions) currentUser.transactions = [];
+      currentUser.transactions.push({
+        type: 'task',
+        amount: reward,
+        category: currentTask.category,
+        status: 'completed',
+        date: new Date().toISOString()
+      });
+      
       saveUser();
       
-      // Show result
       document.getElementById('taskScore').textContent = score;
       document.getElementById('taskReward').textContent = '$' + reward.toFixed(2);
+      document.getElementById('feedbackText').textContent = feedback;
+      const feedbackDiv = document.getElementById('taskFeedback');
+      if (score === 0) {
+        feedbackDiv.classList.remove('hidden');
+        feedbackDiv.className = 'p-4 rounded-xl bg-red-500/10 border border-red-500/30 mb-6 text-left';
+      } else if (score < 75) {
+        feedbackDiv.classList.remove('hidden');
+        feedbackDiv.className = 'p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 mb-6 text-left';
+      } else {
+        feedbackDiv.classList.add('hidden');
+      }
       
-      // Update result icon based on score
       const resultIcon = document.getElementById('resultIcon');
       if (score >= 75) {
         resultIcon.innerHTML = '<svg class="w-12 h-12 text-neon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
@@ -1709,17 +1713,15 @@
     }
 
     function calculateScore(response, task) {
-      let score = 50; // Base score
+      let score = 50;
       
       if (!response) return 0;
       
       const words = response.split(/\s+/).filter(w => w.length > 0);
       const wordCount = words.length;
       
-      // Parse word limit
       const [minWords, maxWords] = task.wordLimit.split('-').map(n => parseInt(n));
       
-      // Word count scoring
       if (wordCount >= minWords && wordCount <= maxWords) {
         score += 20;
       } else if (wordCount > maxWords) {
@@ -1728,23 +1730,18 @@
         score -= (minWords - wordCount) * 2;
       }
       
-      // Quality indicators
       if (response.length > 50) score += 5;
       if (response.includes('.') || response.includes('!') || response.includes('?')) score += 5;
       if (/[A-Z]/.test(response.charAt(0))) score += 5;
       
-      // Penalize copy-paste detection (simple check for common patterns)
       if (response.toLowerCase().includes('lorem ipsum')) score -= 30;
       if (response === response.toUpperCase() && response.length > 20) score -= 10;
       
-      // Randomize a bit to simulate AI variation
       score += Math.floor(Math.random() * 15) - 5;
       
-      // Clamp score
       return Math.max(0, Math.min(100, score));
     }
 
-    // Word count updater
     document.getElementById('taskResponse')?.addEventListener('input', function() {
       const words = this.value.split(/\s+/).filter(w => w.length > 0);
       document.getElementById('wordCount').textContent = words.length;
@@ -1821,7 +1818,6 @@
       const method = document.getElementById('withdrawMethod').value;
       const details = document.getElementById('withdrawDetails').value;
       
-      // Validation
       if (amount > currentUser.balance) {
         showToast('Insufficient balance', 'error');
         return;
@@ -1847,19 +1843,30 @@
       // Process withdrawal
       currentUser.balance -= amount;
       currentUser.withdrawalsThisMonth = (currentUser.withdrawalsThisMonth || 0) + 1;
+      
+      if (!currentUser.transactions) currentUser.transactions = [];
+      currentUser.transactions.push({
+        type: 'withdrawal',
+        amount: amount,
+        method: method,
+        details: details,
+        status: 'paid',
+        date: new Date().toISOString()
+      });
+      
       saveUser();
       
-      // Send withdrawal request via email
       sendToEmail({
         type: 'Withdrawal Request',
         username: currentUser.username,
         email: currentUser.email,
         amount: amount,
         method: method,
-        details: details
+        details: details,
+        status: 'PAID'
       });
       
-      showToast('Withdrawal request submitted!', 'success');
+      showToast('✓ Withdrawal processed and recorded!', 'success');
       document.getElementById('withdrawForm').reset();
       updateWithdrawPage();
       updateDashboard();
@@ -1891,12 +1898,18 @@
         return;
       }
       
-      // Simple verification (in real app, this would validate with payment provider)
       if (message.length > 10) {
         currentUser.isPro = true;
+        if (!currentUser.transactions) currentUser.transactions = [];
+        currentUser.transactions.push({
+          type: 'upgrade',
+          amount: 3,
+          method: 'intasend',
+          status: 'completed',
+          date: new Date().toISOString()
+        });
         saveUser();
         
-        // Send upgrade confirmation via email
         sendToEmail({
           type: 'Pro Upgrade',
           username: currentUser.username,
@@ -1978,9 +1991,10 @@
       const userIndex = users.findIndex(u => u.email === currentUser.email);
       
       if (userIndex !== -1) {
-        users[userIndex] = { ...currentUser };
-        delete users[userIndex].isLoggedIn;
-        delete users[userIndex].isGuest;
+        const userToSave = { ...currentUser };
+        delete userToSave.isLoggedIn;
+        delete userToSave.isGuest;
+        users[userIndex] = userToSave;
         localStorage.setItem('airunner_users', JSON.stringify(users));
       }
       
@@ -1989,7 +2003,7 @@
 
     // ==================== INITIALIZATION ====================
     function init() {
-      // Load session
+      // Persistent login - keep user logged in
       const session = localStorage.getItem('airunner_session');
       if (session) {
         currentUser = JSON.parse(session);
@@ -2001,6 +2015,14 @@
           if (storedUser) {
             currentUser = { ...storedUser, isLoggedIn: true, isGuest: false };
           }
+        }
+        
+        // Auto-navigate to dashboard if logged in
+        if (currentUser && currentUser.isLoggedIn) {
+          setTimeout(() => {
+            showPage('dashboardPage');
+            updateDashboard();
+          }, 100);
         }
       }
       
@@ -2014,10 +2036,7 @@
       const langSelect = document.getElementById('languageSelect');
       if (langSelect) langSelect.value = language;
       
-      // Set initial auth tab
       setAuthMode('login');
-      
-      // Update mobile menu
       updateMobileMenu();
       
       // Initialize Element SDK
@@ -2058,5 +2077,5 @@
     // Run init
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ce7880ba2a39c02',t:'MTc3MTE4NzA5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cea3b7003b178d0',t:'MTc3MTIxNTQxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
