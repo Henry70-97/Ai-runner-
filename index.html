@@ -393,7 +393,7 @@
                 </li>
                 <li class="flex items-center gap-3">
                   <span class="text-green-400">✓</span>
-                  <span>Bank & PayPal withdrawal</span>
+                  <span>Bank, PayPal & MPESA withdrawal</span>
                 </li>
               </ul>
               
@@ -433,11 +433,11 @@
                 </li>
                 <li class="flex items-center gap-3">
                   <span class="text-green-400">✓</span>
-                  <span>Withdraw <strong class="text-yellow-300">4x/month</strong> (weekly)</span>
+                  <span>Withdraw <strong class="text-yellow-300">2x per week</strong></span>
                 </li>
                 <li class="flex items-center gap-3">
                   <span class="text-green-400">✓</span>
-                  <span>Lower minimum: <strong>$10</strong></span>
+                  <span>Lower minimum: <strong>$5</strong></span>
                 </li>
               </ul>
               
@@ -655,16 +655,16 @@
               <ul class="space-y-3 text-gray-300">
                 <li>• Minimum: <strong class="text-cyan-300">$20 (KSH 2,580)</strong></li>
                 <li>• Available after: <strong class="text-cyan-300">25 days</strong></li>
-                <li>• Methods: Bank, PayPal</li>
+                <li>• Methods: MPESA, Bank, PayPal</li>
                 <li>• Processing: 3-5 business days</li>
               </ul>
             </div>
             <div class="neon-card-gold flag-border rounded-xl p-6">
               <h4 class="font-orbitron text-lg font-bold text-yellow-300 mb-4">Premium Withdrawal</h4>
               <ul class="space-y-3 text-gray-300">
-                <li>• Minimum: <strong class="text-yellow-300">$10 (KSH 1,290)</strong></li>
-                <li>• Withdraw: <strong class="text-yellow-300">4x per month</strong></li>
-                <li>• Methods: Bank, PayPal</li>
+                <li>• Minimum: <strong class="text-yellow-300">$5 (KSH 645)</strong></li>
+                <li>• Withdraw: <strong class="text-yellow-300">2x per week</strong></li>
+                <li>• Methods: MPESA, Bank, PayPal</li>
                 <li>• Processing: 1-2 business days</li>
               </ul>
             </div>
@@ -707,8 +707,8 @@
                 <li class="flex items-center gap-2"><span class="text-green-400">✓</span> High-paying AI tasks</li>
                 <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Earn $0.50 – $4 per task</li>
                 <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Unlimited daily tasks</li>
-                <li class="flex items-center gap-2"><span class="text-green-400">✓</span> $10 min withdrawal</li>
-                <li class="flex items-center gap-2"><span class="text-green-400">✓</span> Weekly withdrawals</li>
+                <li class="flex items-center gap-2"><span class="text-green-400">✓</span> $5 min withdrawal</li>
+                <li class="flex items-center gap-2"><span class="text-green-400">✓</span> 2x per week withdrawals</li>
               </ul>
               <button id="premiumPlanBtn" onclick="showModal('upgradeModal')" class="btn-neon-gold w-full py-3 rounded-full font-bold text-slate-900">
                 ⭐ Upgrade Now
@@ -820,7 +820,7 @@
           <ul class="space-y-3 mb-8">
             <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> High-paying tasks ($0.50 - $4)</li>
             <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Unlimited daily tasks</li>
-            <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Weekly withdrawals</li>
+            <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> 2x per week withdrawals</li>
             <li class="flex items-center gap-2 text-gray-300"><span class="text-green-400">✓</span> Priority support</li>
           </ul>
           
@@ -898,23 +898,44 @@
         <form id="withdrawForm" onsubmit="handleWithdraw(event)" class="space-y-4">
           <div>
             <label class="block text-sm text-gray-300 mb-2">Amount (USD)</label>
-            <input type="number" name="amount" required min="10" step="0.01" class="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-400 focus:outline-none" placeholder="20.00">
+            <input type="number" name="amount" required min="5" step="0.01" class="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-400 focus:outline-none" placeholder="20.00">
           </div>
           <div>
             <label class="block text-sm text-gray-300 mb-2">Withdrawal Method</label>
-            <select name="method" required class="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-400 focus:outline-none">
+            <select name="method" required onchange="updateWithdrawalFields()" class="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-400 focus:outline-none">
               <option value="">Select method...</option>
-              <option value="bank">Bank Transfer</option>
-              <option value="paypal">PayPal</option>
+              <option value="mpesa">📱 MPESA (Kenya)</option>
+              <option value="bank">🏦 Bank Transfer</option>
+              <option value="paypal">💳 PayPal</option>
             </select>
           </div>
-          <div>
-            <label class="block text-sm text-gray-300 mb-2">Account Details</label>
-            <textarea name="details" required rows="3" class="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-400 focus:outline-none resize-none" placeholder="Enter your bank account number or PayPal email..."></textarea>
+          
+          <div id="mpesaFields" class="hidden space-y-3">
+            <div>
+              <label class="block text-sm text-gray-300 mb-2">MPESA Phone Number</label>
+              <input type="tel" name="mpesa_phone" class="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-400 focus:outline-none" placeholder="+254712345678">
+            </div>
+            <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-xs text-blue-300">
+              ℹ️ Enter your MPESA phone number. You'll receive a prompt to enter your PIN.
+            </div>
+          </div>
+          
+          <div id="bankFields" class="hidden space-y-3">
+            <div>
+              <label class="block text-sm text-gray-300 mb-2">Account Details</label>
+              <textarea name="bank_details" rows="3" class="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-400 focus:outline-none resize-none" placeholder="Enter your bank account number..."></textarea>
+            </div>
+          </div>
+          
+          <div id="paypalFields" class="hidden space-y-3">
+            <div>
+              <label class="block text-sm text-gray-300 mb-2">PayPal Email</label>
+              <input type="email" name="paypal_email" class="w-full bg-slate-800/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-400 focus:outline-none" placeholder="your@email.com">
+            </div>
           </div>
           
           <div id="withdrawInfo" class="text-sm text-yellow-300 bg-yellow-500/10 p-3 rounded-lg">
-            ⚠️ Free plan: Min $20, after 25 days. Premium: Min $10, weekly.
+            ⚠️ Free plan: Min $20, after 25 days. Premium: Min $5, 2x per week.
           </div>
           
           <button type="submit" class="btn-neon-purple w-full py-4 rounded-full font-bold text-lg text-white">
@@ -974,7 +995,7 @@
     <div id="liveReviewModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-overlay">
       <div class="neon-card-gold flag-border rounded-2xl p-8 w-full max-w-2xl max-h-[90%] overflow-y-auto scrollbar-thin animate-slideIn">
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-yellow-500/30">
-          <h3 class="font-orbitron text-xl font-bold text-yellow-300">🔍 Live Review & Scoring</h3>
+          <h3 class="font-orbitron text-xl font-bold text-yellow-300">✨ Live Review & Scoring</h3>
           <button onclick="document.getElementById('liveReviewModal').classList.add('hidden'); document.getElementById('liveReviewModal').classList.remove('flex');" class="text-gray-400 hover:text-white text-2xl">&times;</button>
         </div>
         
@@ -1517,14 +1538,12 @@
       
       const validation = validateMpesaMessage(message);
       
-      // Show validation feedback
       document.getElementById('mpesaValidationFeedback').classList.remove('hidden');
       
       const checkRecipient = document.getElementById('checkRecipient');
       const checkAmount = document.getElementById('checkAmount');
       const checkDate = document.getElementById('checkDate');
       
-      // Update recipient check
       if (validation.recipientValid) {
         checkRecipient.textContent = '✓';
         checkRecipient.classList.remove('bg-slate-700');
@@ -1535,7 +1554,6 @@
         checkRecipient.classList.add('bg-red-500/50', 'text-red-300');
       }
       
-      // Update amount check
       if (validation.amountValid) {
         checkAmount.textContent = '✓';
         checkAmount.classList.remove('bg-slate-700');
@@ -1546,7 +1564,6 @@
         checkAmount.classList.add('bg-red-500/50', 'text-red-300');
       }
       
-      // Update date check
       if (validation.dateValid) {
         checkDate.textContent = '✓';
         checkDate.classList.remove('bg-slate-700');
@@ -1557,7 +1574,6 @@
         checkDate.classList.add('bg-red-500/50', 'text-red-300');
       }
       
-      // All checks passed - activate premium
       if (validation.recipientValid && validation.amountValid && validation.dateValid) {
         activatePremium(message, validation);
       } else {
@@ -1572,15 +1588,12 @@
     function validateMpesaMessage(message) {
       const messageLower = message.toLowerCase();
       
-      // Check for recipient: Lipana Technologies Limited
       const recipientValid = messageLower.includes('lipana') && 
                             (messageLower.includes('technolog') || 
                              messageLower.includes('account number'));
       
-      // Check for amount: KSH 357
       const amountValid = messageLower.includes('357') || message.includes('357.00') || messageLower.includes('ksh 357');
       
-      // Check for today's date
       const today = new Date();
       const todayStr = today.getDate().toString();
       const monthStr = (today.getMonth() + 1).toString();
@@ -1609,7 +1622,6 @@
         return;
       }
       
-      // Upgrade user to premium
       currentUser.plan = 'premium';
       currentUser.premiumActivatedAt = new Date().toISOString();
       currentUser.mpesaVerification = {
@@ -1619,7 +1631,6 @@
       
       saveToStorage('user', currentUser);
       
-      // Send verification to email
       await sendToWeb3Form({
         user_name: currentUser.name,
         user_email: currentUser.email,
@@ -1711,7 +1722,6 @@
       saveToStorage('user', user);
       currentUser = user;
       
-      // Send to email
       await sendToWeb3Form({
         name: user.name,
         email: user.email,
@@ -1750,6 +1760,21 @@
     }
     
     // ============ WITHDRAWAL FUNCTIONS ============
+    function updateWithdrawalFields() {
+      const method = document.querySelector('select[name="method"]').value;
+      document.getElementById('mpesaFields').classList.add('hidden');
+      document.getElementById('bankFields').classList.add('hidden');
+      document.getElementById('paypalFields').classList.add('hidden');
+      
+      if (method === 'mpesa') {
+        document.getElementById('mpesaFields').classList.remove('hidden');
+      } else if (method === 'bank') {
+        document.getElementById('bankFields').classList.remove('hidden');
+      } else if (method === 'paypal') {
+        document.getElementById('paypalFields').classList.remove('hidden');
+      }
+    }
+    
     async function handleWithdraw(e) {
       e.preventDefault();
       const form = e.target;
@@ -1761,7 +1786,8 @@
       }
       
       const amount = parseFloat(formData.get('amount'));
-      const minWithdraw = currentUser.plan === 'premium' ? 10 : 20;
+      const method = formData.get('method');
+      const minWithdraw = currentUser.plan === 'premium' ? 5 : 20;
       
       if (amount > currentUser.balance) {
         showToast('Insufficient balance', 'error');
@@ -1773,8 +1799,24 @@
         return;
       }
       
-      // Check waiting period for free users
-      if (currentUser.plan === 'free') {
+      if (currentUser.plan === 'premium') {
+        // Check 2x per week limit for premium
+        const withdrawals = currentUser.activities.filter(a => a.type === 'withdrawal');
+        const thisWeekWithdrawals = withdrawals.filter(w => {
+          const wDate = new Date(w.date);
+          const weekStart = new Date();
+          weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+          return wDate >= weekStart;
+        }).length;
+        
+        if (thisWeekWithdrawals >= 2) {
+          const nextWithdrawalDate = new Date();
+          nextWithdrawalDate.setDate(nextWithdrawalDate.getDate() - nextWithdrawalDate.getDay() + 7);
+          showToast(`Weekly limit reached! Next withdrawal available ${nextWithdrawalDate.toLocaleDateString()}`, 'error');
+          return;
+        }
+      } else {
+        // Free plan: 25 days waiting period
         const registeredDate = new Date(currentUser.registeredAt);
         const daysSince = Math.floor((Date.now() - registeredDate) / (1000 * 60 * 60 * 24));
         if (daysSince < 25) {
@@ -1783,23 +1825,31 @@
         }
       }
       
-      // Send withdrawal request
+      let accountDetails = '';
+      if (method === 'mpesa') {
+        accountDetails = formData.get('mpesa_phone');
+      } else if (method === 'bank') {
+        accountDetails = formData.get('bank_details');
+      } else if (method === 'paypal') {
+        accountDetails = formData.get('paypal_email');
+      }
+      
       await sendToWeb3Form({
         user_name: currentUser.name,
         user_email: currentUser.email,
         user_phone: currentUser.phone,
         amount: `$${amount}`,
-        method: formData.get('method'),
-        account_details: formData.get('details'),
+        method: method,
+        account_details: accountDetails,
         user_plan: currentUser.plan
       }, 'Withdrawal Request');
       
-      // Update balance
       currentUser.balance -= amount;
       currentUser.activities.unshift({
         type: 'withdrawal',
         amount: amount,
-        method: formData.get('method'),
+        method: method,
+        accountDetails: accountDetails,
         date: new Date().toISOString(),
         status: 'pending'
       });
@@ -1860,7 +1910,6 @@
     function filterTasks(category) {
       currentFilter = category;
       
-      // Update filter buttons
       document.querySelectorAll('.task-filter-btn').forEach(btn => {
         if (btn.dataset.filter === category) {
           btn.classList.add('bg-cyan-500/20', 'text-cyan-300');
@@ -1882,7 +1931,6 @@
       
       const isPremium = currentUser?.plan === 'premium';
       
-      // Render main task list
       container.innerHTML = tasks.map((task, index) => {
         const locked = task.premium && !isPremium;
         const cardClass = index % 2 === 0 ? 'neon-card' : 'neon-card-alt';
@@ -1915,7 +1963,6 @@
         `;
       }).join('');
       
-      // Render quick tasks (first 5)
       const quickTasks = getAllTasks().filter(t => !t.premium || isPremium).slice(0, 5);
       quickContainer.innerHTML = quickTasks.map((task, index) => {
         const cardClass = index % 2 === 0 ? 'neon-card' : 'neon-card-alt';
@@ -2006,7 +2053,6 @@
       const task = getAllTasks().find(t => t.id === taskId);
       if (!task) return;
       
-      // Check daily limit for free users
       if (currentUser.plan === 'free') {
         const today = new Date().toDateString();
         if (currentUser.lastTaskDate !== today) {
@@ -2020,7 +2066,6 @@
         }
       }
       
-      // Hide task modal and show review modal
       hideModal('taskModal');
       showReviewModal(task, response);
     }
@@ -2028,7 +2073,6 @@
     function showReviewModal(task, response) {
       const reviewContainer = document.getElementById('liveReviewContent');
       
-      // Show review screen with loading
       reviewContainer.innerHTML = `
         <div class="text-center py-12">
           <div class="rotating-progress rotating-progress-gold mx-auto mb-4"></div>
@@ -2039,7 +2083,6 @@
       document.getElementById('liveReviewModal').classList.remove('hidden');
       document.getElementById('liveReviewModal').classList.add('flex');
       
-      // Simulate AI review after 2 seconds
       setTimeout(() => {
         evaluateSubmission(task, response);
       }, 2000);
@@ -2048,7 +2091,6 @@
     function evaluateSubmission(task, response) {
       let scoreData = {};
       
-      // Task-specific evaluation
       if (task.category === 'chat') {
         scoreData = evaluateChatTask(task, response);
       } else if (task.category === 'rewrite') {
@@ -2070,7 +2112,6 @@
         criteria: []
       };
       
-      // Check length
       const wordCount = response.split(/\s+/).length;
       const lengthScore = Math.min(100, (wordCount / 50) * 100);
       score.criteria.push({
@@ -2079,7 +2120,6 @@
         feedback: wordCount < 30 ? '⚠️ Consider more detail' : '✓ Good depth'
       });
       
-      // Check for naturalness indicators
       const hasContraction = /('ve|'re|'ll|'d|n't|'m|'s)/i.test(response);
       const hasVariation = /[!?]/.test(response);
       const naturalScore = (hasContraction ? 40 : 0) + (hasVariation ? 30 : 0) + (lengthScore > 60 ? 30 : 0);
@@ -2089,7 +2129,6 @@
         feedback: naturalScore > 80 ? '✓ Sounds natural' : (naturalScore > 50 ? '⚠️ Could be more natural' : '✗ Needs improvement')
       });
       
-      // Check for focus area coverage
       const focusKeywords = task.focus.split(/\s+/).filter(w => w.length > 3);
       const mentionsKeywords = focusKeywords.some(kw => response.toLowerCase().includes(kw.toLowerCase()));
       const focusScore = (mentionsKeywords || response.toLowerCase().includes(task.focus.toLowerCase())) ? 100 : 50;
@@ -2099,7 +2138,6 @@
         feedback: focusScore > 75 ? `✓ Addresses ${task.focus}` : `⚠️ Could better address ${task.focus}`
       });
       
-      // Check for context appropriateness
       const hasContext = response.length > 100;
       const contextScore = hasContext ? 100 : 70;
       score.criteria.push({
@@ -2118,7 +2156,6 @@
         criteria: []
       };
       
-      // Check if errors are identified
       const hasErrors = /\b(error|wrong|incorrect|should be|fix|improve)\b/i.test(response);
       const errorScore = hasErrors ? 100 : 40;
       score.criteria.push({
@@ -2127,7 +2164,6 @@
         feedback: errorScore > 75 ? '✓ Errors identified' : '✗ Errors not identified'
       });
       
-      // Check for explanation quality
       const wordCount = response.split(/\s+/).length;
       const explanationScore = Math.min(100, (wordCount / 60) * 100);
       score.criteria.push({
@@ -2136,7 +2172,6 @@
         feedback: explanationScore > 70 ? '✓ Clear explanation' : '⚠️ Explain more'
       });
       
-      // Check for correction provided
       const hasCorrection = response.toLowerCase().includes('should be') || 
                            response.toLowerCase().includes('correct') ||
                            response.toLowerCase().includes('instead');
@@ -2147,7 +2182,6 @@
         feedback: correctionScore > 75 ? '✓ Correct version provided' : '⚠️ Provide corrected version'
       });
       
-      // Check for rule explanation
       const ruleScore = response.toLowerCase().includes('rule') || 
                        response.toLowerCase().includes('grammar') ||
                        response.toLowerCase().includes('agreement') ? 90 : 60;
@@ -2167,7 +2201,6 @@
         criteria: []
       };
       
-      // Check length
       const wordCount = response.split(/\s+/).length;
       const lengthScore = Math.min(100, (wordCount / 40) * 100);
       score.criteria.push({
@@ -2176,7 +2209,6 @@
         feedback: lengthScore > 70 ? '✓ Complete translation' : '⚠️ Add more detail'
       });
       
-      // Check for accuracy indicators
       const hasAccuracy = response.length > 30;
       const accuracyScore = hasAccuracy ? 85 : 50;
       score.criteria.push({
@@ -2185,7 +2217,6 @@
         feedback: accuracyScore > 75 ? '✓ Looks accurate' : '⚠️ Verify accuracy'
       });
       
-      // Check for context appropriateness
       const contextMatch = task.direction && task.context;
       const contextScore = (contextMatch && response.length > 25) ? 100 : 70;
       score.criteria.push({
@@ -2194,7 +2225,6 @@
         feedback: contextScore > 75 ? `✓ Fits ${task.context} context` : '⚠️ Consider context'
       });
       
-      // Check for explanation (for cultural/idiomatic notes)
       const hasExplanation = response.toLowerCase().includes('explain') || 
                             response.toLowerCase().includes('note') ||
                             response.toLowerCase().includes('idiom') ||
@@ -2216,7 +2246,6 @@
         criteria: []
       };
       
-      // Check length/detail
       const wordCount = response.split(/\s+/).length;
       const detailScore = Math.min(100, (wordCount / 100) * 100);
       score.criteria.push({
@@ -2225,7 +2254,6 @@
         feedback: detailScore > 70 ? '✓ Very detailed prompt' : '⚠️ Add more specifics'
       });
       
-      // Check if all keywords are included
       const keywordMatches = task.keywords.filter(kw => 
         response.toLowerCase().includes(kw.toLowerCase())
       ).length;
@@ -2236,7 +2264,6 @@
         feedback: keywordScore > 70 ? '✓ All keywords included' : `⚠️ Missing ${task.keywords.length - keywordMatches} keywords`
       });
       
-      // Check for design specifications
       const hasDesignSpecs = /design|style|color|layout|responsive|modern|minimal/i.test(response);
       const designScore = hasDesignSpecs ? 100 : 60;
       score.criteria.push({
@@ -2245,7 +2272,6 @@
         feedback: designScore > 75 ? '✓ Design clearly specified' : '⚠️ Add design details'
       });
       
-      // Check for component clarity
       const hasComponents = /component|element|section|button|form|field/i.test(response);
       const componentScore = hasComponents ? 100 : 70;
       score.criteria.push({
@@ -2264,7 +2290,6 @@
         criteria: []
       };
       
-      // Check word count requirement
       const wordCount = response.split(/\s+/).length;
       const minWords = task.minWords || 200;
       const maxWords = task.maxWords || 500;
@@ -2276,7 +2301,6 @@
         feedback: `${wordCount} words (${minWords}-${maxWords} required). ${lengthScore === 100 ? '✓ Perfect!' : '⚠️ Adjust length'}`
       });
       
-      // Check keyword coverage
       const keywordMatches = (task.keywords || []).filter(kw => 
         response.toLowerCase().includes(kw.toLowerCase())
       ).length;
@@ -2287,7 +2311,6 @@
         feedback: keywordScore > 70 ? `✓ ${keywordMatches}/${task.keywords.length} keywords` : `⚠️ Only ${keywordMatches}/${task.keywords.length}`
       });
       
-      // Check case study references
       const caseStudyMatches = (task.caseStudies || []).filter(cs => 
         response.toLowerCase().includes(cs.toLowerCase().split(' ')[0])
       ).length;
@@ -2298,7 +2321,6 @@
         feedback: caseStudyMatches > 0 ? `✓ ${caseStudyMatches} case study(ies) cited` : '⚠️ Add case studies'
       });
       
-      // Check for clear opinion/argumentation
       const hasOpinion = /i believe|i think|my opinion|should|must|need|important|however|alternatively|contrary/i.test(response);
       const opinionScore = hasOpinion ? 100 : 60;
       score.criteria.push({
@@ -2404,7 +2426,6 @@
         </div>
       `;
       
-      // Store current submission for confirmation
       window.currentSubmission = {
         task: task,
         response: response,
@@ -2422,7 +2443,6 @@
         return;
       }
       
-      // Check daily limit for free users
       if (currentUser.plan === 'free') {
         const today = new Date().toDateString();
         if (currentUser.lastTaskDate !== today) {
@@ -2436,7 +2456,6 @@
         }
       }
       
-      // Update user data with actual earned amount
       const payment = parseFloat(submission.payment);
       currentUser.balance += payment;
       currentUser.totalEarned += payment;
@@ -2469,11 +2488,9 @@
     function updateDashboard() {
       if (!currentUser) return;
       
-      // Update user info
       document.getElementById('userName').textContent = currentUser.name;
       document.getElementById('dashboardUserName').textContent = currentUser.name.split(' ')[0];
       
-      // Update plan badge
       const planBadge = document.getElementById('userPlanBadge');
       if (currentUser.plan === 'premium') {
         planBadge.textContent = '👑 PREMIUM';
@@ -2485,7 +2502,6 @@
         planBadge.classList.remove('bg-yellow-500/20', 'text-yellow-300');
       }
       
-      // Update balance
       const balance = currentUser.balance.toFixed(2);
       const balanceKsh = usdToKsh(currentUser.balance);
       document.getElementById('walletBalance').textContent = `$${balance}`;
@@ -2493,13 +2509,11 @@
       document.getElementById('walletBalanceLarge').textContent = `$${balance}`;
       document.getElementById('walletBalanceKsh').textContent = `KSH ${balanceKsh.toLocaleString()}`;
       
-      // Update stats
       document.getElementById('tasksCompleted').textContent = currentUser.tasksCompleted;
       document.getElementById('totalEarned').textContent = `$${currentUser.totalEarned.toFixed(2)}`;
       document.getElementById('todayTasks').textContent = currentUser.plan === 'premium' ? '∞' : `${currentUser.todayTasks}/20`;
       document.getElementById('accountType').textContent = currentUser.plan.toUpperCase();
       
-      // Update plans section
       const freePlanBtn = document.getElementById('freePlanBtn');
       const premiumPlanBtn = document.getElementById('premiumPlanBtn');
       
@@ -2511,7 +2525,6 @@
         premiumPlanBtn.classList.add('bg-green-500/20', 'text-green-300', 'cursor-default');
       }
       
-      // Update recent activity
       const activityContainer = document.getElementById('recentActivity');
       if (currentUser.activities.length === 0) {
         activityContainer.innerHTML = '<p class="text-gray-400 text-center py-4">No recent activity yet. Start completing tasks!</p>';
@@ -2544,7 +2557,6 @@
         }).join('');
       }
       
-      // Update earnings history
       const historyContainer = document.getElementById('earningsHistory');
       if (currentUser.earnings.length === 0) {
         historyContainer.innerHTML = '<p class="text-gray-400 text-center py-8">No earnings history yet. Complete tasks to start earning!</p>';
@@ -2571,17 +2583,14 @@
     }
     
     function toggleCurrency() {
-      // Simple toggle visual feedback
       showToast('Currency: 1 USD = KSH 129', 'info');
     }
     
     // ============ INITIALIZATION ============
     function init() {
-      // Check for logged in user
       currentUser = getFromStorage('user');
       
       if (currentUser) {
-        // Reset daily tasks if new day
         const today = new Date().toDateString();
         if (currentUser.lastTaskDate !== today) {
           currentUser.todayTasks = 0;
@@ -2619,5 +2628,5 @@
     // Start the app
     init();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cf4ac76168fb280',t:'MTc3MTMyNDkwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cf4e91765c0b280',t:'MTc3MTMyNzM4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
